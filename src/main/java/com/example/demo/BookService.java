@@ -66,6 +66,6 @@ public class BookService {
     public List<Book> putBook(int bookId, Book book){
         this.books.get(bookId).setAuthor(book.getAuthor());
         this.books.get(bookId).setTitle(book.getTitle());
-        return books;
+        return this.books;
     }
 }
