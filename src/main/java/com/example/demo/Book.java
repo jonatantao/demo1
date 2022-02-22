@@ -1,15 +1,15 @@
 package com.example.demo;
 
 public class Book {
-    private String autors;
+    private String author;
     private String title;
 
-    public String getAutors() {
-        return autors;
+    public String getAuthor() {
+        return author;
     }
 
-    public void setAutors(String autors) {
-        this.autors = autors;
+    public void setAuthor(String author) {
+        this.author = author;
     }
 
     public String getTitle() {
@@ -19,7 +19,4 @@ public class Book {
     public void setTitle(String title) {
         this.title = title;
     }
-
-
-
 }
