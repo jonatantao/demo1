@@ -1,71 +1,75 @@
 package com.example.demo;
 
-
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.ArrayList;
+import javax.transaction.Transactional;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class BookService {
-    private List<Book> books;
+    private final BookRepository bookRepository;
 
-    public BookService(){
-        this.books = init();
+    public BookService(BookRepository bookRepository) {
+        this.bookRepository = bookRepository;
     }
 
-    public List<Book> init( ){
-        List<Book> books = new ArrayList<>();
+    private static BookDto mapToBookDto(BookEntity bookEntity) {
+        BookDto bookDto = new BookDto();
 
-        Book book1 = new Book();
-        book1.setAuthor("Jozo");
-        book1.setTitle("Ahoj");
-        books.add(book1);
+        bookDto.setAuthor(bookEntity.getAuthor());
+        bookDto.setTitle(bookEntity.getTitle());
 
-        Book book2 = new Book();
-        book2.setAuthor("Fero");
-        book2.setTitle("serus moj");
-        books.add(book2);
-
-        return books;
-
+        return bookDto;
     }
 
-    public List<Book> getBooks(String bookAutor) {
-        if (bookAutor == null){
-            return this.books;
+    @Transactional
+    public List<BookDto> getBooks(String bookAuthor) {
+        List<BookDto> ret = new LinkedList<>();
+        for (BookEntity b1 : bookRepository.findAll()) {
+            BookDto b2 = mapToBookDto(b1);
+            ret.add(b2);
         }
+        return ret;
+    }
 
-        List<Book> filteredBooks = new ArrayList<>();
-
-        for(Book book : books){
-            if (book.getAuthor().equals(bookAutor)){
-                filteredBooks.add(book);
-            }
+    @Transactional
+    public BookDto getBook(Long bookId) {
+        Optional<BookEntity> byId = bookRepository.findById(bookId);
+        if (byId.isPresent()) {
+            return mapToBookDto(byId.get());
         }
-
-        return this.books;
+        return null;
     }
 
-    public Book getBook(int bookId) {
-        return this.books.get(bookId);
+    @Transactional
+    public Long createBook(BookDto bookDto) {
+        BookEntity bookEntity = new BookEntity();
+
+        bookEntity.setAuthor(bookDto.getAuthor());
+        bookEntity.setTitle(bookDto.getTitle());
+
+        this.bookRepository.save(bookEntity);
+
+        return bookEntity.getId();
     }
 
-    public List<Book> createBook(Book book){
-        this.books.add(book);
-        return this.books;
+    @Transactional
+    public void updateBook(int bookId, BookDto bookDto) {
+        Optional<BookEntity> byId = bookRepository.findById((long)bookId);
+        if (byId.isPresent()) {
+            byId.get().setAuthor(bookDto.getAuthor());
+            byId.get().setTitle(bookDto.getTitle());
+        }
     }
 
-    public void deleteBook(int bookId){
-        this.books.remove(this.books.get(bookId));
+    @Transactional
+    public void deleteBook(int bookId) {
+        Optional<BookEntity> byId = bookRepository.findById((long)bookId);
+        if (byId.isPresent()) {
+            bookRepository.delete(byId.get());
+        }
     }
 
-    public List<Book> putBook(int bookId, Book book){
-        this.books.get(bookId).setAuthor(book.getAuthor());
-        this.books.get(bookId).setTitle(book.getTitle());
-        return this.books;
-    }
 }
